@@ -1,6 +1,7 @@
 package com.disruptioncomplex;
 
 import com.disruptioncomplex.block.ModBlockHandler;
+import com.disruptioncomplex.item.ModItemGroups;
 import com.disruptioncomplex.item.ModItemHandler;
 import net.fabricmc.api.ModInitializer;
 
@@ -22,6 +23,7 @@ public class MurkysManyFish implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+		ModItemGroups.registerItemGroups();
 		ModItemHandler.registerModItems();
 		ModBlockHandler.registerBlocks();
 

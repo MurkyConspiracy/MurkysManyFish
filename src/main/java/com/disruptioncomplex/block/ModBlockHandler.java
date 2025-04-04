@@ -46,9 +46,6 @@ public class ModBlockHandler {
     public static void registerBlocks() {
         MurkysManyFish.LOGGER.info("Registering Blocks for " + MurkysManyFish.MOD_ID);
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register((content) -> {
-            content.add(CRAB_TRAP);
-        });
     }
 
 }

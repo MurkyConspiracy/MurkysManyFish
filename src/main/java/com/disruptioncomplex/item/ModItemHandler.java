@@ -14,32 +14,28 @@ import java.util.ArrayList;
 
 public class ModItemHandler {
 
-    public static final Item TRASH_PILE = registerItem(ItemTrashPile.ITEM_ID, new ItemTrashPile());
+    /*
+    Raw Fish Items
+     */
     public static final Item STARFISH = registerItem(ItemStarfish.ITEM_ID, new ItemStarfish());
     public static final Item ANGELFISH = registerItem(ItemAngelfish.ITEM_ID, new ItemAngelfish());
     public static final Item MACKEREL = registerItem(ItemMackerel.ITEM_ID, new ItemMackerel());
     public static final Item TUNA = registerItem(ItemTuna.ITEM_ID, new ItemTuna());
 
+    /*
+    Cooked Fish Items
+     */
+    public static final Item ANGELFISH_COOKED = registerItem(ItemAngelfishCooked.ITEM_ID, new ItemAngelfishCooked());
+    /*
+    Fishing Related Items
+     */
+
+    public static final Item TRASH_PILE = registerItem(ItemTrashPile.ITEM_ID, new ItemTrashPile());
 
     public static void registerModItems() {
 
         MurkysManyFish.LOGGER.info("Registering modded items for " + MurkysManyFish.MOD_ID);
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register((content) -> {
-            content.add(TRASH_PILE);
-        });
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register((content) -> {
-            content.add(STARFISH);
-        });
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register((content) -> {
-            content.add(ANGELFISH);
-        });
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register((content) -> {
-            content.add(MACKEREL);
-        });
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register((content) -> {
-            content.add(TUNA);
-        });
 
     }
 

@@ -3,8 +3,12 @@
   "item.murkys-many-fish.trash_pile" : "Trash Pile",
   "item.murkys-many-fish.starfish" : "Starfish",
   "item.murkys-many-fish.angelfish" : "Angelfish",
+  "item.murkys-many-fish.angelfish_cooked" : "Cooked Angelfish",
   "item.murkys-many-fish.mackerel" : "Mackerel",
   "item.murkys-many-fish.tuna" : "tuna",
-  "item.murkys-many-fish.crab_trap_block" : "Crab Trap"
+  "item.murkys-many-fish.crab_trap_block" : "Crab Trap",
+
+
+  "itemgoup.murkys-many-fish.item_group": "Murk's Many Fish"
 
 }
