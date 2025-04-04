@@ -3,6 +3,7 @@ package com.disruptioncomplex;
 import com.disruptioncomplex.block.ModBlockHandler;
 import com.disruptioncomplex.item.ModItemGroups;
 import com.disruptioncomplex.item.ModItemHandler;
+import com.disruptioncomplex.loottable.ModLootHandler;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -26,6 +27,6 @@ public class MurkysManyFish implements ModInitializer {
 		ModItemGroups.registerItemGroups();
 		ModItemHandler.registerModItems();
 		ModBlockHandler.registerBlocks();
-
+		ModLootHandler.registerLoot();
 	}
 }

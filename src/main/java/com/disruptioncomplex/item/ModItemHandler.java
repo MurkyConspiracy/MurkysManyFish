@@ -23,10 +23,10 @@ public class ModItemHandler {
     public static final Item ANGELFISH_COOKED = registerItem(ItemAngelfishCooked.ITEM_ID, new ItemAngelfishCooked());
     public static final Item MACKEREL_COOKED = registerItem(ItemMackerelCooked.ITEM_ID, new ItemMackerelCooked());
     public static final Item TUNA_COOKED = registerItem(ItemTunaCooked.ITEM_ID, new ItemTunaCooked());
+
     /*
     Fishing Related Items
      */
-
     public static final Item TRASH_PILE = registerItem(ItemTrashPile.ITEM_ID, new ItemTrashPile());
 
     public static void registerModItems() {

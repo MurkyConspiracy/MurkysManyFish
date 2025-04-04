@@ -22,8 +22,8 @@ public class ModItemGroups {
                         entries.add(ModItemHandler.TRASH_PILE);
 
                         //Fish items
-                        entries.add(ModItemHandler.ANGELFISH_COOKED);
                         entries.add(ModItemHandler.ANGELFISH);
+                        entries.add(ModItemHandler.ANGELFISH_COOKED);
                         entries.add(ModItemHandler.MACKEREL);
                         entries.add(ModItemHandler.MACKEREL_COOKED);
                         entries.add(ModItemHandler.STARFISH);
