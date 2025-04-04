@@ -1,31 +1,28 @@
 package com.disruptioncomplex.item;
 
 import com.disruptioncomplex.MurkysManyFish;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 
 public class ModItemHandler {
 
     /*
     Raw Fish Items
      */
-    public static final Item STARFISH = registerItem(ItemStarfish.ITEM_ID, new ItemStarfish());
     public static final Item ANGELFISH = registerItem(ItemAngelfish.ITEM_ID, new ItemAngelfish());
     public static final Item MACKEREL = registerItem(ItemMackerel.ITEM_ID, new ItemMackerel());
+    public static final Item STARFISH = registerItem(ItemStarfish.ITEM_ID, new ItemStarfish());
     public static final Item TUNA = registerItem(ItemTuna.ITEM_ID, new ItemTuna());
 
     /*
     Cooked Fish Items
      */
     public static final Item ANGELFISH_COOKED = registerItem(ItemAngelfishCooked.ITEM_ID, new ItemAngelfishCooked());
+    public static final Item MACKEREL_COOKED = registerItem(ItemMackerelCooked.ITEM_ID, new ItemMackerelCooked());
+    public static final Item TUNA_COOKED = registerItem(ItemTunaCooked.ITEM_ID, new ItemTunaCooked());
     /*
     Fishing Related Items
      */

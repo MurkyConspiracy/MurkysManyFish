@@ -16,6 +16,7 @@ public class ItemMackerel extends Item{
                 new Item.Settings()
                         .registryKey(RegistryKey.of(RegistryKeys.ITEM,Identifier.of(MurkysManyFish.MOD_ID,"mackerel")))
                         .food(new FoodComponent.Builder().nutrition(2).saturationModifier(0.1F).build())
+
         );
 
         MurkysManyFish.LOGGER.info("Building Mackerel");
