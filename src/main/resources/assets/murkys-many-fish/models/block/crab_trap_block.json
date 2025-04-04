@@ -1,0 +1,7 @@
+{
+
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all" : "murkys-many-fish:block/crab_trap_block"
+  }
+}

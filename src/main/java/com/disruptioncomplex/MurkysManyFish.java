@@ -1,5 +1,7 @@
 package com.disruptioncomplex;
 
+import com.disruptioncomplex.block.ModBlockHandler;
+import com.disruptioncomplex.item.ModItemHandler;
 import net.fabricmc.api.ModInitializer;
 
 import org.slf4j.Logger;
@@ -20,7 +22,8 @@ public class MurkysManyFish implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+		ModItemHandler.registerModItems();
+		ModBlockHandler.registerBlocks();
 
-		LOGGER.info("Hello Fabric world!");
 	}
 }
