@@ -27,6 +27,7 @@ public class ModItemGroups {
                         entries.add(ModItemHandler.MACKEREL);
                         entries.add(ModItemHandler.MACKEREL_COOKED);
                         entries.add(ModItemHandler.MACKEREL_SPAWN_EGG);
+                        entries.add(ModItemHandler.MACKEREL_BUCKET);
                         entries.add(ModItemHandler.STARFISH);
                         entries.add(ModItemHandler.TUNA);
                         entries.add(ModItemHandler.TUNA_COOKED);
