@@ -1,6 +1,7 @@
 package com.disruptioncomplex.item;
 
 import com.disruptioncomplex.MurkysManyFish;
+import com.disruptioncomplex.entity.ModEntityHandler;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -14,6 +15,7 @@ public class ModItemHandler {
      */
     public static final Item ANGELFISH = registerItem(ItemAngelfish.ITEM_ID, new ItemAngelfish());
     public static final Item MACKEREL = registerItem(ItemMackerel.ITEM_ID, new ItemMackerel());
+    public static final Item MACKEREL_SPAWN_EGG = registerItem(ItemMackerelSpawnEgg.ITEM_ID, new ItemMackerelSpawnEgg(ModEntityHandler.MACKEREL));
     public static final Item STARFISH = registerItem(ItemStarfish.ITEM_ID, new ItemStarfish());
     public static final Item TUNA = registerItem(ItemTuna.ITEM_ID, new ItemTuna());
 

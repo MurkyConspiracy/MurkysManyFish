@@ -1,11 +1,14 @@
 package com.disruptioncomplex;
 
 import com.disruptioncomplex.block.ModBlockHandler;
+import com.disruptioncomplex.entity.ModEntityHandler;
+import com.disruptioncomplex.entity.custom.MackerelEntity;
 import com.disruptioncomplex.item.ModItemGroups;
 import com.disruptioncomplex.item.ModItemHandler;
 import com.disruptioncomplex.loottable.ModLootHandler;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +27,12 @@ public class MurkysManyFish implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
+		ModEntityHandler.registerModEntities();
 		ModItemGroups.registerItemGroups();
 		ModItemHandler.registerModItems();
 		ModBlockHandler.registerBlocks();
 		ModLootHandler.registerLoot();
+
+		FabricDefaultAttributeRegistry.register(ModEntityHandler.MACKEREL, MackerelEntity.createAttributes());
 	}
 }
