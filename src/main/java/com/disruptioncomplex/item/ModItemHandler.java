@@ -19,6 +19,8 @@ public class ModItemHandler {
     public static final Item MACKEREL_BUCKET = registerItem(ItemMackerelBucket.ITEM_ID, new ItemMackerelBucket());
     public static final Item STARFISH = registerItem(ItemStarfish.ITEM_ID, new ItemStarfish());
     public static final Item TUNA = registerItem(ItemTuna.ITEM_ID, new ItemTuna());
+    public static final Item TUNA_SPAWN_EGG = registerItem(ItemTunaSpawnEgg.ITEM_ID, new ItemTunaSpawnEgg(ModEntityHandler.TUNA));
+    public static final Item TUNA_BUCKET = registerItem(ItemTunaBucket.ITEM_ID, new ItemTunaBucket());
 
     /*
     Cooked Fish Items

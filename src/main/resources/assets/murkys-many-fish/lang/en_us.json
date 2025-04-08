@@ -7,16 +7,18 @@
   "item.murkys-many-fish.mackerel" : "Mackerel",
   "item.murkys-many-fish.mackerel_cooked" : "Cooked Mackerel",
   "item.murkys-many-fish.mackerel_spawn_egg" : "Mackerel Spawn Egg",
-  "item.murkys-many-fish.mackerel_bucket" : "Mackerel Bucket",
+  "item.murkys-many-fish.mackerel_bucket" : "Bucket of Mackerel",
   "item.murkys-many-fish.starfish" : "Starfish",
   "item.murkys-many-fish.tuna" : "Tuna",
   "item.murkys-many-fish.tuna_cooked": "Cooked Tuna",
-
+  "item.murkys-many-fish.tuna_spawn_egg" : "Tuna Spawn Egg",
+  "item.murkys-many-fish.tuna_bucket" : "Bucket of Tuna",
   "item.murkys-many-fish.crab_trap_block" : "Crab Trap",
 
 
   "itemgoup.murkys-many-fish.item_group": "Murk's Many Fish",
 
-  "entity.murkys-many-fish.mackerel": "Mackerel"
+  "entity.murkys-many-fish.mackerel": "Mackerel",
+  "entity.murkys-many-fish.tuna": "Tuna"
 
 }

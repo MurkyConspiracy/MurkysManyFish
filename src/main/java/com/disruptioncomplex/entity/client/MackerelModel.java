@@ -8,6 +8,7 @@ import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
+@SuppressWarnings("unused")
 public class MackerelModel extends EntityModel<LivingEntityRenderState> {
 
 
