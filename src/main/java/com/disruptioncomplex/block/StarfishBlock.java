@@ -78,12 +78,18 @@ public class StarfishBlock extends Block implements Waterloggable {
 
     @Override
     public boolean tryFillWithFluid(WorldAccess world, BlockPos pos, BlockState state, FluidState fluidState) {
-        return Waterloggable.super.tryFillWithFluid(world, pos, state, fluidState);
+        if (state.get(WATERLOGGED) || fluidState.getFluid() != Fluids.WATER) {
+            return false;
+        }
+        world.setBlockState(pos, state.with(WATERLOGGED, true), Block.NOTIFY_ALL);
+        world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+        return true;
     }
+
 
     @Override
     public boolean canFillWithFluid(@Nullable LivingEntity filler, BlockView world, BlockPos pos, BlockState state, Fluid fluid) {
-        return  Waterloggable.super.canFillWithFluid(filler, world, pos, state, fluid);
+        return !state.get(WATERLOGGED) && fluid == Fluids.WATER;
     }
 
     @Override
