@@ -24,21 +24,22 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class StarfishBlock extends Block implements Waterloggable {
+public class CrabTrapBlock extends Block implements Waterloggable {
 
-    public static final String BLOCK_ID = "starfish_block";
+    public static final String BLOCK_ID = "crab_trap_block";
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final Settings BLOCK_SETTINGS = AbstractBlock.Settings.create()
             .instrument(NoteBlockInstrument.HAT)
             .strength(0.3F)
-            .sounds(BlockSoundGroup.CORAL)
+            .sounds(BlockSoundGroup.IRON)
             .nonOpaque()
             .allowsSpawning(Blocks::never)
             .solidBlock(Blocks::never)
             .suffocates(Blocks::never)
             .blockVision(Blocks::never);
 
-    public StarfishBlock() {
+
+    public CrabTrapBlock() {
         super(BLOCK_SETTINGS);
         this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
     }
@@ -95,4 +96,3 @@ public class StarfishBlock extends Block implements Waterloggable {
     }
 
 }
-

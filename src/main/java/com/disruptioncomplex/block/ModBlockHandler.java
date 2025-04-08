@@ -3,29 +3,18 @@ package com.disruptioncomplex.block;
 import com.disruptioncomplex.MurkysManyFish;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 
 public class ModBlockHandler {
 
 
-    public static final Block CRAB_TRAP = registerBlock("crab_trap_block", AbstractBlock.Settings.create().instrument(NoteBlockInstrument.HAT)
-            .strength(0.3F)
-            .sounds(BlockSoundGroup.GLASS)
-            .nonOpaque()
-            .allowsSpawning(Blocks::never)
-            .solidBlock(Blocks::never)
-            .suffocates(Blocks::never)
-            .blockVision(Blocks::never));
-
+    public static final Block CRAB_TRAP = registerBlock(CrabTrapBlock.BLOCK_ID, CrabTrapBlock.BLOCK_SETTINGS);
     public static final Block STARFISH = registerBlock(StarfishBlock.BLOCK_ID, StarfishBlock.BLOCK_SETTINGS);
 
     private static Block registerBlock(String name, AbstractBlock.Settings blockSettings) {
