@@ -1,14 +1,12 @@
 package com.disruptioncomplex.block;
 
 import com.disruptioncomplex.MurkysManyFish;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -27,6 +25,8 @@ public class ModBlockHandler {
             .solidBlock(Blocks::never)
             .suffocates(Blocks::never)
             .blockVision(Blocks::never));
+
+    public static final Block STARFISH = registerBlock(StarfishBlock.BLOCK_ID, StarfishBlock.BLOCK_SETTINGS);
 
     private static Block registerBlock(String name, AbstractBlock.Settings blockSettings) {
         RegistryKey<Block> key = RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(MurkysManyFish.MOD_ID, name));

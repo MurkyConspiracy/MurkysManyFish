@@ -37,6 +37,7 @@ public class ModItemGroups {
 
                         //Functional
                         entries.add(ModBlockHandler.CRAB_TRAP);
+                        entries.add(ModBlockHandler.STARFISH);
                     }).build());
 
 
