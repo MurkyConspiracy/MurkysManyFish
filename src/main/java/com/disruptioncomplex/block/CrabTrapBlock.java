@@ -74,16 +74,14 @@ public class CrabTrapBlock extends Block implements Waterloggable {
             Random random
     ) {
         MurkysManyFish.LOGGER.info("getStateForNeighborUpdate");
-        if (!state.canPlaceAt(world, pos)) {
-            MurkysManyFish.LOGGER.info(Boolean.toString(state.canPlaceAt(world, pos)));
-            return Blocks.AIR.getDefaultState();
-        } else {
-            if (state.get(WATERLOGGED)) {
-                MurkysManyFish.LOGGER.info("Waterlog True");
-                tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
-            }
-            return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+
+        if (state.get(WATERLOGGED)) {
+            MurkysManyFish.LOGGER.info("Waterlog True");
+            tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+
+
         }
+        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override
@@ -98,15 +96,12 @@ public class CrabTrapBlock extends Block implements Waterloggable {
 
     @Override
     public boolean tryFillWithFluid(WorldAccess world, BlockPos pos, BlockState state, FluidState fluidState) {
-        MurkysManyFish.LOGGER.info("tryFillWithFluid");
-        if (state.get(WATERLOGGED) || fluidState.getFluid() != Fluids.WATER) {
-            MurkysManyFish.LOGGER.info("Fill False");
-            return false;
+        if (!state.get(WATERLOGGED) && fluidState.getFluid() == Fluids.WATER) {
+            world.setBlockState(pos, state.with(WATERLOGGED, true), 3);
+            return true;
         }
-        world.setBlockState(pos, state.with(WATERLOGGED, true), Block.NOTIFY_ALL);
-        world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
-        MurkysManyFish.LOGGER.info("Fill True");
-        return true;
+        return false;
+
     }
 
 
