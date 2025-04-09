@@ -14,17 +14,28 @@ import net.minecraft.util.Identifier;
 public class ModBlockHandler {
 
 
-    public static final Block CRAB_TRAP = registerBlock(CrabTrapBlock.BLOCK_ID, CrabTrapBlock.BLOCK_SETTINGS);
-    public static final Block STARFISH = registerBlock(StarfishBlock.BLOCK_ID, StarfishBlock.BLOCK_SETTINGS);
+    public static final Block CRAB_TRAP = registerBlock(CrabTrapBlock.class);
+    public static final Block STARFISH = registerBlock(StarfishBlock.class);
 
-    private static Block registerBlock(String name, AbstractBlock.Settings blockSettings) {
-        RegistryKey<Block> key = RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(MurkysManyFish.MOD_ID, name));
-        Block block = new Block(blockSettings.registryKey(key));
 
-        registerBlockItem(name, block);
-        return Registry.register(Registries.BLOCK, key, block);
+    private static <T extends Block> T registerBlock( Class<T> blockClass) {
+        T block;
+        String name;
+        AbstractBlock.Settings blockSettings;
+        try {
+
+            name = blockClass.getDeclaredField("BLOCK_ID").get(null).toString();
+            blockSettings = (AbstractBlock.Settings) blockClass.getDeclaredField("BLOCK_SETTINGS").get(null);
+            RegistryKey<Block> key = RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(MurkysManyFish.MOD_ID, name));
+            block = blockClass.getConstructor(AbstractBlock.Settings.class).newInstance(blockSettings.registryKey(key));
+            registerBlockItem(name, block);
+            return Registry.register(Registries.BLOCK, key, block);
+
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to instantiate block of type " + blockClass, e);
+        }
+
     }
-
 
     private static void registerBlockItem(String name, Block block) {
         RegistryKey<Item> key = RegistryKey.of(RegistryKeys.ITEM, Identifier.of(MurkysManyFish.MOD_ID, name));
