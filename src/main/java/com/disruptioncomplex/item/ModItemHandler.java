@@ -37,7 +37,10 @@ public class ModItemHandler {
     public static void registerModItems() {
 
         MurkysManyFish.LOGGER.info("Registering modded items for " + MurkysManyFish.MOD_ID);
-
+        /*
+        This is important as without this method the variable in the class are not yet created.
+        Calling this method triggers the static variables to be defined and doing so triggers the blocks to be registered.
+         */
 
     }
 
