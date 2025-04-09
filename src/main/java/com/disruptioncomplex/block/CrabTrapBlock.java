@@ -1,5 +1,6 @@
 package com.disruptioncomplex.block;
 
+import com.disruptioncomplex.MurkysManyFish;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.entity.LivingEntity;
@@ -39,9 +40,10 @@ public class CrabTrapBlock extends Block implements Waterloggable {
             .blockVision(Blocks::never);
 
 
-    public CrabTrapBlock() {
-        super(BLOCK_SETTINGS);
+    public CrabTrapBlock(AbstractBlock.Settings settings) {
+        super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
+        MurkysManyFish.LOGGER.info("Crab Trap Block Created");
     }
 
     @Override
@@ -53,19 +55,35 @@ public class CrabTrapBlock extends Block implements Waterloggable {
     public @Nullable BlockState getPlacementState(ItemPlacementContext ctx) {
         WorldView worldView = ctx.getWorld();
         BlockPos pos = ctx.getBlockPos();
-
+        MurkysManyFish.LOGGER.info("getPlacementState");
         boolean waterlogged = worldView.getFluidState(pos).getFluid() == net.minecraft.fluid.Fluids.WATER;
+        MurkysManyFish.LOGGER.info("Waterlogged : {}",waterlogged);
         return this.getDefaultState().with(WATERLOGGED, waterlogged);
     }
 
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-        if(state.get(WATERLOGGED))
-        {
-            tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+    protected BlockState getStateForNeighborUpdate(
+            BlockState state,
+            WorldView world,
+            ScheduledTickView tickView,
+            BlockPos pos,
+            Direction direction,
+            BlockPos neighborPos,
+            BlockState neighborState,
+            Random random
+    ) {
+        MurkysManyFish.LOGGER.info("getStateForNeighborUpdate");
+        if (!state.canPlaceAt(world, pos)) {
+            MurkysManyFish.LOGGER.info(Boolean.toString(state.canPlaceAt(world, pos)));
+            return Blocks.AIR.getDefaultState();
+        } else {
+            if (state.get(WATERLOGGED)) {
+                MurkysManyFish.LOGGER.info("Waterlog True");
+                tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+            }
+            return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
         }
-        return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override
@@ -80,17 +98,23 @@ public class CrabTrapBlock extends Block implements Waterloggable {
 
     @Override
     public boolean tryFillWithFluid(WorldAccess world, BlockPos pos, BlockState state, FluidState fluidState) {
+        MurkysManyFish.LOGGER.info("tryFillWithFluid");
         if (state.get(WATERLOGGED) || fluidState.getFluid() != Fluids.WATER) {
+            MurkysManyFish.LOGGER.info("Fill False");
             return false;
         }
         world.setBlockState(pos, state.with(WATERLOGGED, true), Block.NOTIFY_ALL);
         world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+        MurkysManyFish.LOGGER.info("Fill True");
         return true;
     }
 
 
     @Override
     public boolean canFillWithFluid(@Nullable LivingEntity filler, BlockView world, BlockPos pos, BlockState state, Fluid fluid) {
+        MurkysManyFish.LOGGER.info("canFillWithFluid");
+
+        MurkysManyFish.LOGGER.info(state.get(WATERLOGGED).toString());
         return !state.get(WATERLOGGED) && fluid == Fluids.WATER;
     }
 

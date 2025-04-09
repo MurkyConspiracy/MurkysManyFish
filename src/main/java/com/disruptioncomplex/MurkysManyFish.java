@@ -26,11 +26,11 @@ public class MurkysManyFish implements ModInitializer {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
-		ModEntityHandler.registerModEntities();
 		ModItemGroups.registerItemGroups();
-		ModItemHandler.registerModItems();
 		ModBlockHandler.registerBlocks();
+		ModItemHandler.registerModItems();
 		ModLootHandler.registerLoot();
+		ModEntityHandler.registerModEntities();
 
 		ModWorldGeneration.generateModWorldGen();
 
