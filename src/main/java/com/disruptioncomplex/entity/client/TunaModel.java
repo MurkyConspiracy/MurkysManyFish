@@ -17,13 +17,15 @@ public class TunaModel extends EntityModel<LivingEntityRenderState> {
 
     public ModelPart body;
     public ModelPart head;
-    public ModelPart tailFin;
+    public ModelPart tail_front;
+    public ModelPart tail_back;
 
     public TunaModel(ModelPart root) {
         super(root);
         this.body = root.getChild("body_front");
         this.head = root.getChild("head");
-        this.tailFin = root.getChild("tail");
+        this.tail_front = root.getChild("tail_front");
+        this.tail_back = root.getChild("tail_back");
     }
 
     public static TexturedModelData getTexturedModelData() {
@@ -35,7 +37,8 @@ public class TunaModel extends EntityModel<LivingEntityRenderState> {
 
         ModelPartData left_fin = body_front.addChild("left_fin", ModelPartBuilder.create().uv(-3, 20).cuboid(0.0F, 0.0F, -1.0F, 4.0F, 0.0F, 3.0F, new Dilation(0.0F)), ModelTransform.of(1.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.7854F));
 
-        ModelPartData body_mid = modelPartData.addChild("body_mid", ModelPartBuilder.create().uv(12, 13).cuboid(-3.0F, -8.0F, 0.0F, 6.0F, 6.0F, 4.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
+        ModelPartData body_mid = modelPartData.addChild("body_mid", ModelPartBuilder.create().uv(12, 13).cuboid(-3.0F, -8.0F, -4.0F, 6.0F, 6.0F, 4.0F, new Dilation(0.0F))
+                .uv(12, 13).cuboid(-3.0F, -8.0F, -8.0F, 6.0F, 6.0F, 4.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 24.0F, 8.0F));
 
         ModelPartData bone = body_mid.addChild("bone", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 0.0F, 0.0F));
 
@@ -45,8 +48,11 @@ public class TunaModel extends EntityModel<LivingEntityRenderState> {
 
         ModelPartData fin_back = modelPartData.addChild("fin_back", ModelPartBuilder.create().uv(0, -4).cuboid(0.0F, -3.0F, 0.0F, 0.0F, 4.0F, 7.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 15.0F, -3.0F));
 
-        ModelPartData tail = modelPartData.addChild("tail", ModelPartBuilder.create().uv(14, -4).cuboid(0.0F, -3.0F, 3.0F, 0.0F, 4.0F, 4.0F, new Dilation(0.0F))
-                .uv(0, 25).cuboid(-2.0F, -3.0F, 0.0F, 4.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 20.0F, 4.0F));
+        ModelPartData tail_front = modelPartData.addChild("tail_front", ModelPartBuilder.create().uv(12, 13).cuboid(-3.0F, -4.0F, -4.0F, 6.0F, 6.0F, 4.0F, new Dilation(0.0F))
+                .uv(14, -3).cuboid(0.0F, -8.0F, -7.0F, 0.0F, 4.0F, 7.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 20.0F, 12.0F));
+
+        ModelPartData tail_back = modelPartData.addChild("tail_back", ModelPartBuilder.create().uv(14, -4).cuboid(0.0F, -7.0F, 15.0F, 0.0F, 4.0F, 4.0F, new Dilation(0.0F))
+                .uv(0, 25).cuboid(-2.0F, -7.0F, 12.0F, 4.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
         return TexturedModelData.of(modelData, 32, 32);
     }
 
@@ -63,7 +69,7 @@ public class TunaModel extends EntityModel<LivingEntityRenderState> {
     public void setAngles(LivingEntityRenderState livingEntityRenderState) {
         super.setAngles(livingEntityRenderState);
         float f = livingEntityRenderState.touchingWater ? 1.0F : 1.5F;
-        this.tailFin.yaw = -f * 0.45F * MathHelper.sin(0.6F * livingEntityRenderState.age);
+        this.tail_front.yaw = this.tail_back.yaw = -f * 0.06F * MathHelper.sin(0.6F * livingEntityRenderState.age);
     }
 
 }

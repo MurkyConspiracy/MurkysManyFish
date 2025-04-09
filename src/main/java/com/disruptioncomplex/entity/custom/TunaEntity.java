@@ -1,5 +1,6 @@
 package com.disruptioncomplex.entity.custom;
 
+import com.disruptioncomplex.item.ModItemHandler;
 import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -74,6 +75,6 @@ public class TunaEntity extends SchoolingFishEntity {
 
     @Override
     public ItemStack getBucketItem() {
-        return null;
+        return new ItemStack( ModItemHandler.TUNA_BUCKET);
     }
 }
