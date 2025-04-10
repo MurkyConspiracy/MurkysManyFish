@@ -26,8 +26,10 @@ import java.util.Objects;
 
 public class StarfishBlock extends Block implements Waterloggable {
 
+    @SuppressWarnings("unused")
     public static final String BLOCK_ID = "starfish_block";
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+    @SuppressWarnings("unused")
     public static final Settings BLOCK_SETTINGS = AbstractBlock.Settings.create()
             .instrument(NoteBlockInstrument.HAT)
             .strength(0.3F)
@@ -38,8 +40,8 @@ public class StarfishBlock extends Block implements Waterloggable {
             .suffocates(Blocks::never)
             .blockVision(Blocks::never);
 
-    public StarfishBlock() {
-        super(BLOCK_SETTINGS);
+    public StarfishBlock(AbstractBlock.Settings settings) {
+        super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
     }
 

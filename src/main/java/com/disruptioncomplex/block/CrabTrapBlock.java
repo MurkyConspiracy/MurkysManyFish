@@ -27,8 +27,10 @@ import java.util.Objects;
 
 public class CrabTrapBlock extends Block implements Waterloggable {
 
+    @SuppressWarnings("unused")
     public static final String BLOCK_ID = "crab_trap_block";
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+    @SuppressWarnings("unused")
     public static final Settings BLOCK_SETTINGS = AbstractBlock.Settings.create()
             .instrument(NoteBlockInstrument.HAT)
             .strength(0.3F)
@@ -43,7 +45,6 @@ public class CrabTrapBlock extends Block implements Waterloggable {
     public CrabTrapBlock(AbstractBlock.Settings settings) {
         super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
-        MurkysManyFish.LOGGER.info("Crab Trap Block Created");
     }
 
     @Override
