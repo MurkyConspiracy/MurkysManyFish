@@ -1,12 +1,8 @@
 package com.disruptioncomplex.block;
 
-import com.disruptioncomplex.MurkysManyFish;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.NoteBlockInstrument;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
@@ -18,16 +14,15 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
-import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
-import net.minecraft.world.tick.OrderedTick;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class CrabTrapBlock extends HorizontalFacingBlock  implements Waterloggable {
+public class CrabTrapBlock extends Block implements Waterloggable {
 
     @SuppressWarnings("unused")
     public static final String BLOCK_ID = "crab_trap_block";
@@ -50,18 +45,12 @@ public class CrabTrapBlock extends HorizontalFacingBlock  implements Waterloggab
     }
 
     @Override
-    protected MapCodec<? extends HorizontalFacingBlock> getCodec() {
-        return null;
-    }
-
-    @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(WATERLOGGED);
     }
 
     @Override
     public @Nullable BlockState getPlacementState(ItemPlacementContext ctx) {
-        MurkysManyFish.LOGGER.info("getPlacementState: {}", ctx.getWorld().getFluidState(ctx.getBlockPos()));
         return this.getDefaultState()
                 .with(WATERLOGGED, ctx.getWorld().getFluidState(ctx.getBlockPos()).isOf(Fluids.WATER));
     }
@@ -78,13 +67,11 @@ public class CrabTrapBlock extends HorizontalFacingBlock  implements Waterloggab
             BlockState neighborState,
             Random random
     ) {
-        MurkysManyFish.LOGGER.info("getStateForNeighborUpdate WL: {}", WATERLOGGED);
-
         if (state.get(WATERLOGGED)) {
             tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 
-
         }
+
         return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
@@ -98,40 +85,18 @@ public class CrabTrapBlock extends HorizontalFacingBlock  implements Waterloggab
         return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
-
-    @Override
-    public boolean tryFillWithFluid(WorldAccess world, BlockPos pos, BlockState state, FluidState fluidState) {
-        if (!state.get(WATERLOGGED) && fluidState.getFluid() == Fluids.WATER) {
-            MurkysManyFish.LOGGER.info("tryFillWithFluid: WL State {}", state.get(WATERLOGGED) );
-            if(!world.isClient()) {
-                MurkysManyFish.LOGGER.info("tryFillWithFluid: server state {}", !world.isClient() );
-                world.setBlockState(pos, state.with(WATERLOGGED, true), Block.NOTIFY_ALL);
-                state.with(WATERLOGGED, true);
-                world.getFluidTickScheduler().scheduleTick(OrderedTick.create(Fluids.WATER,pos));
-                MurkysManyFish.LOGGER.info("tryFillWithFluid: WL State {}", state.get(WATERLOGGED) );
-            }
-            return true;
-        }
-        return false;
-
-    }
-
-
-    @Override
-    public boolean canFillWithFluid(@Nullable LivingEntity filler, BlockView world, BlockPos pos, BlockState state, Fluid fluid) {
-        MurkysManyFish.LOGGER.info("canFillWithFluid");
-
-        MurkysManyFish.LOGGER.info(state.get(WATERLOGGED).toString());
-        return !state.get(WATERLOGGED) && fluid == Fluids.WATER;
-    }
-
-
     @Override
     protected boolean canPathfindThrough(BlockState state, NavigationType type) {
         if (Objects.requireNonNull(type) == NavigationType.WATER) {
             return state.getFluidState().isIn(FluidTags.WATER);
         }
         return false;
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        // Create a shape that is 1/16th (1 pixel) inward from all sides
+        return Block.createCuboidShape(1, 1, 1, 15, 16, 15);
     }
 
 }
