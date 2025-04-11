@@ -1,6 +1,7 @@
 package com.disruptioncomplex;
 
 import com.disruptioncomplex.block.ModBlockHandler;
+import com.disruptioncomplex.entity.ModBlockEntityHandler;
 import com.disruptioncomplex.entity.ModEntityHandler;
 import com.disruptioncomplex.item.ModItemGroups;
 import com.disruptioncomplex.item.ModItemHandler;
@@ -28,6 +29,7 @@ public class MurkysManyFish implements ModInitializer {
 		// Proceed with mild caution.
 		ModItemGroups.registerItemGroups();
 		ModBlockHandler.registerBlocks();
+		ModBlockEntityHandler.registerModBlockEntities();
 		ModItemHandler.registerModItems();
 		ModLootHandler.registerLoot();
 		ModEntityHandler.registerModEntities();

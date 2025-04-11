@@ -29,6 +29,7 @@ public class ModEntityHandler {
                             RegistryKeys.ENTITY_TYPE,
                             Identifier.of(MurkysManyFish.MOD_ID,"tuna"))));
 
+
     public static void registerModEntities() {
         MurkysManyFish.LOGGER.info("Registering Mod Entities for " + MurkysManyFish.MOD_ID);
 

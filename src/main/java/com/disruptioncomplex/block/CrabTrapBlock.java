@@ -1,28 +1,35 @@
 package com.disruptioncomplex.block;
 
+import com.disruptioncomplex.entity.block.CrabTrapBlockEntity;
 import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.entity.ai.pathing.NavigationType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.Items;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.tick.ScheduledTickView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class CrabTrapBlock extends Block implements Waterloggable {
+public class CrabTrapBlock extends Block implements Waterloggable,BlockEntityProvider {
 
     @SuppressWarnings("unused")
     public static final String BLOCK_ID = "crab_trap_block";
@@ -43,6 +50,12 @@ public class CrabTrapBlock extends Block implements Waterloggable {
         super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
     }
+
+    @Override
+    public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new CrabTrapBlockEntity(pos, state);
+    }
+
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
@@ -99,4 +112,17 @@ public class CrabTrapBlock extends Block implements Waterloggable {
         return Block.createCuboidShape(1, 1, 1, 15, 16, 15);
     }
 
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if(player.getStackInHand(player.getActiveHand()).isOf(Items.WATER_BUCKET)) {
+            return ActionResult.FAIL;
+        }
+        if(!world.isClient) {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if(blockEntity instanceof CrabTrapBlockEntity) {
+                player.openHandledScreen((CrabTrapBlockEntity)blockEntity);
+            }
+        }
+        return ActionResult.SUCCESS;
+    }
 }
