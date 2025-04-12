@@ -33,6 +33,10 @@ public class ModItemGroups {
                         entries.add(ModItemHandler.TUNA_COOKED);
                         entries.add(ModItemHandler.TUNA_SPAWN_EGG);
                         entries.add(ModItemHandler.TUNA_BUCKET);
+                        entries.add(ModItemHandler.BETTA);
+                        entries.add(ModItemHandler.CARP);
+                        entries.add(ModItemHandler.GOLDFISH);
+                        entries.add(ModItemHandler.KOI);
 
 
                         //Functional

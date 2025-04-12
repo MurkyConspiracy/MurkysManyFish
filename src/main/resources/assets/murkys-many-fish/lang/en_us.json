@@ -1,18 +1,23 @@
 {
 
-  "item.murkys-many-fish.trash_pile" : "Trash Pile",
+  "item.murkys-many-fish.trash_pile": "Trash Pile",
 
-  "item.murkys-many-fish.angelfish" : "Angelfish",
-  "item.murkys-many-fish.angelfish_cooked" : "Cooked Angelfish",
-  "item.murkys-many-fish.mackerel" : "Mackerel",
-  "item.murkys-many-fish.mackerel_cooked" : "Cooked Mackerel",
-  "item.murkys-many-fish.mackerel_spawn_egg" : "Mackerel Spawn Egg",
-  "item.murkys-many-fish.mackerel_bucket" : "Bucket of Mackerel",
-  "item.murkys-many-fish.starfish" : "Starfish",
-  "item.murkys-many-fish.tuna" : "Tuna",
+  "item.murkys-many-fish.angelfish": "Angelfish",
+  "item.murkys-many-fish.angelfish_cooked": "Cooked Angelfish",
+  "item.murkys-many-fish.betta": "Betta Fish",
+  "item.murkys-many-fish.carp": "Carp",
+  "item.murkys-many-fish.goldfish": "Goldfish",
+  "item.murkys-many-fish.koi": "Koi Fish",
+  "item.murkys-many-fish.mackerel": "Mackerel",
+  "item.murkys-many-fish.mackerel_bucket": "Bucket of Mackerel",
+  "item.murkys-many-fish.mackerel_cooked": "Cooked Mackerel",
+  "item.murkys-many-fish.mackerel_spawn_egg": "Mackerel Spawn Egg",
+  "item.murkys-many-fish.starfish": "Starfish",
+  "item.murkys-many-fish.tuna": "Tuna",
+  "item.murkys-many-fish.tuna_bucket": "Bucket of Tuna",
   "item.murkys-many-fish.tuna_cooked": "Cooked Tuna",
-  "item.murkys-many-fish.tuna_spawn_egg" : "Tuna Spawn Egg",
-  "item.murkys-many-fish.tuna_bucket" : "Bucket of Tuna",
+  "item.murkys-many-fish.tuna_spawn_egg": "Tuna Spawn Egg",
+
   "item.murkys-many-fish.crab_trap_block" : "Crab Trap",
 
 

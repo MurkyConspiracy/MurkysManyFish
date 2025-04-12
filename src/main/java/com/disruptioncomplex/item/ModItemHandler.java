@@ -21,6 +21,10 @@ public class ModItemHandler {
     public static final Item TUNA = registerItem(ItemTuna.ITEM_ID, new ItemTuna());
     public static final Item TUNA_SPAWN_EGG = registerItem(ItemTunaSpawnEgg.ITEM_ID, new ItemTunaSpawnEgg(ModEntityHandler.TUNA));
     public static final Item TUNA_BUCKET = registerItem(ItemTunaBucket.ITEM_ID, new ItemTunaBucket());
+    public static final Item BETTA = registerItem(ItemBetta.ITEM_ID, new ItemBetta());
+    public static final Item CARP = registerItem(ItemCarp.ITEM_ID, new ItemCarp());
+    public static final Item GOLDFISH = registerItem(ItemGoldfish.ITEM_ID, new ItemGoldfish());
+    public static final Item KOI = registerItem(ItemKoi.ITEM_ID, new ItemKoi());
 
     /*
     Cooked Fish Items
