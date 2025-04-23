@@ -1,5 +1,6 @@
 package com.disruptioncomplex.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.entity.LivingEntity;
@@ -24,11 +25,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class StarfishBlock extends Block implements Waterloggable {
+public class StarfishBlock extends FacingBlock implements Waterloggable {
 
     @SuppressWarnings("unused")
     public static final String BLOCK_ID = "starfish_block";
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+    public static final MapCodec<StarfishBlock> CODEC = createCodec(StarfishBlock::new);
     @SuppressWarnings("unused")
     public static final Settings BLOCK_SETTINGS = AbstractBlock.Settings.create()
             .instrument(NoteBlockInstrument.HAT)
@@ -42,12 +44,17 @@ public class StarfishBlock extends Block implements Waterloggable {
 
     public StarfishBlock(AbstractBlock.Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
+        this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false).with(FACING, Direction.UP));
+    }
+
+    @Override
+    protected MapCodec<? extends FacingBlock> getCodec() {
+        return CODEC;
     }
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(WATERLOGGED);
+        builder.add(WATERLOGGED,FACING);
     }
 
     @Override
@@ -56,7 +63,7 @@ public class StarfishBlock extends Block implements Waterloggable {
         BlockPos pos = ctx.getBlockPos();
 
         boolean waterlogged = worldView.getFluidState(pos).getFluid() == net.minecraft.fluid.Fluids.WATER;
-        return this.getDefaultState().with(WATERLOGGED, waterlogged);
+        return this.getDefaultState().with(WATERLOGGED, waterlogged).with(FACING, ctx.getPlayerLookDirection().getOpposite().getOpposite());
     }
 
     @Override
