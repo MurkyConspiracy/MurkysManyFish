@@ -1,6 +1,5 @@
 package com.disruptioncomplex.block;
 
-import com.disruptioncomplex.MurkysManyFish;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.NoteBlockInstrument;
@@ -64,8 +63,6 @@ public class StarfishBlock extends FacingBlock implements Waterloggable {
         BlockPos pos = ctx.getBlockPos();
 
         boolean waterlogged = worldView.getFluidState(pos).getFluid() == net.minecraft.fluid.Fluids.WATER;
-        MurkysManyFish.LOGGER.debug("Facing {}",ctx.getPlayerLookDirection().toString());
-        MurkysManyFish.LOGGER.debug("Reverse Facing {}",ctx.getPlayerLookDirection().getOpposite().toString());
         return this.getDefaultState().with(WATERLOGGED, waterlogged).with(FACING, ctx.getPlayerLookDirection().getOpposite());
     }
 
