@@ -20,10 +20,25 @@ public class ModItemGroups {
                     .entries((displayContext, entries) -> {
                         //Non fish items
                         entries.add(ModItemHandler.TRASH_PILE);
+                        entries.add(ModItemHandler.CONCH_SHELL);
+                        entries.add(ModItemHandler.EMPTY_BOTTLE);
+                        entries.add(ModItemHandler.FISH_SCALES);
 
                         //Fish items
+                        entries.add(ModItemHandler.ANCHOVY);
                         entries.add(ModItemHandler.ANGELFISH);
+                        entries.add(ModItemHandler.ANGLER);
                         entries.add(ModItemHandler.ANGELFISH_COOKED);
+                        entries.add(ModItemHandler.BLUEGILL);
+                        entries.add(ModItemHandler.BREAM);
+                        entries.add(ModItemHandler.CATFISH);
+                        entries.add(ModItemHandler.CENTIPEDE);
+                        entries.add(ModItemHandler.CHUB);
+                        entries.add(ModItemHandler.CLAM);
+                        entries.add(ModItemHandler.CRAB);
+                        entries.add(ModItemHandler.CRAYFISH);
+                        entries.add(ModItemHandler.EARTHWORM);
+                        entries.add(ModItemHandler.EEL);
                         entries.add(ModItemHandler.MACKEREL);
                         entries.add(ModItemHandler.MACKEREL_COOKED);
                         entries.add(ModItemHandler.MACKEREL_SPAWN_EGG);

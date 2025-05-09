@@ -13,7 +13,19 @@ public class ModItemHandler {
     /*
     Raw Fish Items
      */
+    public static final Item ANCHOVY = registerItem(ItemAnchovy.ITEM_ID, new ItemAnchovy());
     public static final Item ANGELFISH = registerItem(ItemAngelfish.ITEM_ID, new ItemAngelfish());
+    public static final Item ANGLER = registerItem(ItemAngler.ITEM_ID, new ItemAngler());
+    public static final Item BLUEGILL = registerItem(ItemBluegill.ITEM_ID, new ItemBluegill());
+    public static final Item BREAM = registerItem(ItemBream.ITEM_ID, new ItemBream());
+    public static final Item CATFISH = registerItem(ItemCatfish.ITEM_ID, new ItemCatfish());
+    public static final Item CENTIPEDE = registerItem(ItemCentipede.ITEM_ID, new ItemCentipede());
+    public static final Item CHUB = registerItem(ItemChub.ITEM_ID, new ItemChub());
+    public static final Item CLAM = registerItem(ItemClam.ITEM_ID, new ItemClam());
+    public static final Item CRAB = registerItem(ItemCrab.ITEM_ID, new ItemCrab());
+    public static final Item CRAYFISH = registerItem(ItemCrayfish.ITEM_ID, new ItemCrayfish());
+    public static final Item EARTHWORM = registerItem(ItemEarthworm.ITEM_ID, new ItemEarthworm());
+    public static final Item EEL = registerItem(ItemEel.ITEM_ID, new ItemEel());
     public static final Item MACKEREL = registerItem(ItemMackerel.ITEM_ID, new ItemMackerel());
     public static final Item MACKEREL_SPAWN_EGG = registerItem(ItemMackerelSpawnEgg.ITEM_ID, new ItemMackerelSpawnEgg(ModEntityHandler.MACKEREL));
     public static final Item MACKEREL_BUCKET = registerItem(ItemMackerelBucket.ITEM_ID, new ItemMackerelBucket());
@@ -37,6 +49,9 @@ public class ModItemHandler {
     Fishing Related Items
      */
     public static final Item TRASH_PILE = registerItem(ItemTrashPile.ITEM_ID, new ItemTrashPile());
+    public static final Item CONCH_SHELL = registerItem(ItemConchShell.ITEM_ID, new ItemConchShell());
+    public static final Item EMPTY_BOTTLE = registerItem(ItemEmptyBottle.ITEM_ID, new ItemEmptyBottle());
+    public static final Item FISH_SCALES = registerItem(ItemFishScales.ITEM_ID, new ItemFishScales());
 
     public static void registerModItems() {
 
