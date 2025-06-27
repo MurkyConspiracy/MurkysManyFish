@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "cookingtime": 600,
+  "experience": 0.35,
+  "ingredient": "murkys-many-fish:mackerel",
+  "result": {
+    "id": "murkys-many-fish:mackerel_cooked"
+  }
+}

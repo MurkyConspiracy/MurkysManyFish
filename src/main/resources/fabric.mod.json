@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "murkys-many-fish",
+	"version": "${version}",
+	"name": "Murky's Many Fish",
+	"description": "You want fish? Well you can have 'em!",
+	"authors": [
+		"MurkyConspiracy"
+	],
+	"contact": {
+		"homepage": "https://disruptioncomplex.com/",
+		"sources": "https://disruptioncomplex.com/"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/murkys-many-fish/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.disruptioncomplex.MurkysManyFish"
+		],
+		"fabric-datagen": [
+			"com.disruptioncomplex.MurkysManyFishDataGenerator"
+		],
+		"client": [
+			"com.disruptioncomplex.MurkysManyFishClient"
+		]
+	},
+	"mixins": [
+		"murkys-many-fish.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.12",
+		"minecraft": "~1.21.5",
+		"java": ">=21",
+		"fabric-api": "*",
+		"murkys-many-apis":">=1.1.0"
+	},
+	"suggests": {
+		"another-mod": "*"
+	},
+	"custom": {
+		"debugMode": true
+	}
+}

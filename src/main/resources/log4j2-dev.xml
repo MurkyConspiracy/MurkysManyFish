@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration name="Dev">
+    <Appenders>
+        <Console name="SysOut" target="SYSTEM_OUT">
+            <PatternLayout>
+                <LoggerNamePatternSelector
+                        defaultPattern="%style{[%d{HH:mm:ss}]}{blue} %highlight{[%t/%level]}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=bright_blue, TRACE=blue} %style{(%logger{1})}{cyan} %highlight{%msg%n}{FATAL=red, ERROR=red, WARN=normal, INFO=normal, DEBUG=bright_blue,underline, TRACE=normal}"
+                        disableAnsi="${sys:fabric.log.disableAnsi:-true}">
+                    <!-- Dont show the logger name for minecraft classes-->
+                    <PatternMatch key="net.minecraft.,com.mojang."
+                                  pattern="%style{[%d{HH:mm:ss}]}{blue} %highlight{[%t/%level]}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=bright_blue, TRACE=blue} %style{(Minecraft)}{cyan} %highlight{%msg{nolookups}%n}{FATAL=red, ERROR=red, WARN=normal, INFO=normal, DEBUG=bright_blue,underline, TRACE=normal}"/>
+                </LoggerNamePatternSelector>
+            </PatternLayout>
+        </Console>
+        <File name="DebugFile" fileName="logs/debug.log">
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] (%logger) %msg{nolookups}%n" />
+        </File>
+        <File name="LatestFile" fileName="logs/latest.log">
+            <PatternLayout>
+                <LoggerNamePatternSelector defaultPattern="[%d{HH:mm:ss}] [%t/%level] (%logger{1}) %msg{nolookups}%n">
+                    <!-- Dont show the logger name for minecraft classes-->
+                    <PatternMatch key="net.minecraft.,com.mojang." pattern="[%d{HH:mm:ss}] [%t/%level] (Minecraft) %msg{nolookups}%n"/>
+                </LoggerNamePatternSelector>
+            </PatternLayout>
+        </File>
+        <!--	Vanilla server gui	-->
+        <Queue name="ServerGuiConsole" ignoreExceptions="true">
+            <PatternLayout>
+                <LoggerNamePatternSelector defaultPattern="[%d{HH:mm:ss} %level] (%logger{1}) %msg{nolookups}%n">
+                    <!-- Dont show the logger name for minecraft classes-->
+                    <PatternMatch key="net.minecraft.,com.mojang." pattern="[%d{HH:mm:ss} %level] %msg{nolookups}%n"/>
+                </LoggerNamePatternSelector>
+            </PatternLayout>
+        </Queue>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="murkys-many-fish" level="trace" additivity="false">
+            <AppenderRef ref="DebugFile" level="${sys:fabric.log.debug.level:-debug}"/>
+            <AppenderRef ref="SysOut" level="${sys:fabric.log.debug.level:-debug}"/>
+            <AppenderRef ref="LatestFile" level="${sys:fabric.log.debug.level:-debug}"/>
+            <AppenderRef ref="ServerGuiConsole" level="${sys:fabric.log.debug.level:-debug}"/>
+        </Logger>
+    </Loggers>
+</Configuration>

@@ -1,0 +1,153 @@
+plugins {
+    id 'fabric-loom' version '1.10-SNAPSHOT'
+    id 'maven-publish'
+    id 'idea'
+}
+
+// Function to increment the patch version directly
+def getIncrementedVersion() {
+    def propertiesFile = file('gradle.properties')
+    def props = new Properties()
+    propertiesFile.withInputStream { props.load(it) }
+
+    // Get current version and parse it
+    def currentVersion = props.getProperty('mod_version')
+    def versionParts = currentVersion.split('\\.')
+
+    // Increment the patch version (last number)
+    def major = versionParts[0] as int
+    def minor = versionParts[1] as int
+    def patch = (versionParts.length > 2 ? versionParts[2] as int : 0) + 1
+
+    // Create new version
+    def newVersion = "${major}.${minor}.${patch}"
+
+    // Update the gradle.properties file
+    props.setProperty('mod_version', newVersion)
+    propertiesFile.withOutputStream {
+        props.store(it, "Gradle properties - auto-updated mod_version")
+    }
+
+    return newVersion
+}
+
+// Create a task to increment version only when building
+tasks.register('incrementVersion') {
+    doLast {
+        def newVersion = getIncrementedVersion()
+        project.version = newVersion
+        println "Version incremented to: ${newVersion}"
+    }
+}
+
+// Make build depend on incrementVersion
+tasks.named('build') {
+    dependsOn 'incrementVersion'
+}
+
+wrapper {
+    gradleVersion = '8.5'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+sourceSets.main.java.srcDirs += [ 'src/main/generatedJava' ]
+compileJava.options.generatedSourceOutputDirectory = file("${projectDir}/src/main/generatedJava/com/disruptioncomplex/config")
+
+fabricApi {
+    configureDataGeneration()
+}
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    maven { url 'https://maven.wispforest.io/releases/' }
+    mavenLocal()
+}
+
+// Configure all configurations to not cache dynamic versions or changing modules
+configurations.configureEach {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+}
+
+// Add a version check task
+tasks.register('checkMurkysApiVersion') {
+    doLast {
+        configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            if (artifact.moduleVersion.id.group == "com.disruptioncomplex" &&
+                    artifact.moduleVersion.id.name == "murkysmanyapis") {
+                println "Using murkysmanyapis version: ${artifact.moduleVersion.id.version}"
+            }
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    modImplementation "io.wispforest:owo-lib:${project.owo_version}"
+    include "io.wispforest:owo-sentinel:${project.owo_version}"
+    annotationProcessor modImplementation("io.wispforest:owo-lib:${project.owo_version}")
+
+    // Add the missing murkysmanyapis dependency
+    modImplementation "com.disruptioncomplex:murkysmanyapis:${project.murkysmanyapis_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": inputs.properties.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+    options.annotationProcessorPath = configurations.annotationProcessor
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+sourcesJar {
+    dependsOn compileJava
+}
+
+jar {
+    inputs.property "archivesName", project.base.archivesName
+    from("LICENSE") {
+        rename { "${it}_${inputs.properties.archivesName}"}
+    }
+}
+
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = project.archives_base_name
+            from components.java
+        }
+    }
+    repositories {
+        // Add repositories to publish to here.
+    }
+}
+
+idea {
+    module {
+        sourceDirs += file('src/main/generatedJava')
+        generatedSourceDirs += file('src/main/generatedJava')
+    }
+}
+loom {
+    log4jConfigs.from(file("src/main/resources/log4j2-dev.xml"))
+}

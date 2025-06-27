@@ -1,0 +1,28 @@
+
+{
+  "variants": {
+    "facing=down": {
+      "model": "murkys-many-fish:block/starfish_block",
+      "x": 90
+    },
+    "facing=east": {
+      "model": "murkys-many-fish:block/starfish_block",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "murkys-many-fish:block/starfish_block"
+    },
+    "facing=south": {
+      "model": "murkys-many-fish:block/starfish_block",
+      "y": 180
+    },
+    "facing=up": {
+      "model": "murkys-many-fish:block/starfish_block",
+      "x": 270
+    },
+    "facing=west": {
+      "model": "murkys-many-fish:block/starfish_block",
+      "y": 270
+    }
+  }
+}

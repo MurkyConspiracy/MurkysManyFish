@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "" : {
+      "model": "murkys-many-fish:block/crab_trap_block"
+    }
+  }
+}

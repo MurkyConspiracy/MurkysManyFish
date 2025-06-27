@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "murkys-many-fish:block/clam_block_dead",
+      "y": -90
+    },
+    "facing=south": {
+      "model": "murkys-many-fish:block/clam_block_dead",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "murkys-many-fish:block/clam_block_dead",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "murkys-many-fish:block/clam_block_dead",
+      "y": 0
+    }
+  }
+}

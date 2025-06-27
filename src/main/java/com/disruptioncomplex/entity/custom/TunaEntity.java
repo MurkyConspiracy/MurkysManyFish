@@ -1,0 +1,80 @@
+package com.disruptioncomplex.entity.custom;
+
+import com.disruptioncomplex.item.ModItemHandler;
+import net.minecraft.entity.AnimationState;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.SchoolingFishEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.World;
+
+public class TunaEntity extends SchoolingFishEntity {
+
+    public final AnimationState idleAnimationState = new AnimationState();
+    private int idleAnimationTimer = 0;
+
+    public TunaEntity(EntityType<? extends SchoolingFishEntity> entityType, World world) {
+        super(entityType, world);
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.ENTITY_COD_AMBIENT;
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.ENTITY_COD_DEATH;
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SoundEvents.ENTITY_COD_HURT;
+    }
+
+    @Override
+    protected SoundEvent getFlopSound() {
+        return SoundEvents.ENTITY_COD_FLOP;
+    }
+
+    public static DefaultAttributeContainer.Builder createAttributes() {
+
+        return MobEntity.createMobAttributes()
+                .add(EntityAttributes.MAX_HEALTH,6)
+                .add(EntityAttributes.MOVEMENT_SPEED, 0.3)
+                .add(EntityAttributes.FOLLOW_RANGE, 20);
+    }
+
+    private void setupAnimationStates()
+    {
+        if (this.idleAnimationTimer <=0)
+        {
+            this.idleAnimationTimer = 40;
+            this.idleAnimationState.start(this.age);
+        }else
+        {
+            --this.idleAnimationTimer;
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if(this.getWorld().isClient)
+        {
+            this.setupAnimationStates();
+        }
+    }
+
+
+    @Override
+    public ItemStack getBucketItem() {
+        return new ItemStack( ModItemHandler.TUNA_BUCKET);
+    }
+}

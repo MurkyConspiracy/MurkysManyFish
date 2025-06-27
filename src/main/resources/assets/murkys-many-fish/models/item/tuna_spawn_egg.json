@@ -1,0 +1,7 @@
+{
+
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0" : "murkys-many-fish:item/tuna_spawn_egg"
+  }
+}

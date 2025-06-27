@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "down": "murkys-many-fish:block/debug_down",
+    "right": "murkys-many-fish:block/debug_right",
+    "left": "murkys-many-fish:block/debug_left",
+    "up": "murkys-many-fish:block/debug_up",
+    "front": "murkys-many-fish:block/debug_front",
+    "back": "murkys-many-fish:block/debug_back",
+    "particle": "murkys-many-fish:block/debug_front"
+  },
+  "elements": [
+    {   "from": [ 0, 0, 0 ],
+      "to": [ 16, 16, 16 ],
+      "faces": {
+        "down":  { "uv": [ 0, 0, 16, 16 ], "texture": "#down", "cullface": "down" },
+        "up":    { "uv": [ 0, 16, 16, 0 ], "texture": "#up", "cullface": "up" },
+        "north": { "uv": [ 0, 0, 16, 16 ], "texture": "#front", "cullface": "north" },
+        "south": { "uv": [ 0, 0, 16, 16 ], "texture": "#back", "cullface": "south" },
+        "west":  { "uv": [ 0, 0, 16, 16 ], "texture": "#left", "cullface": "west" },
+        "east":  { "uv": [ 0, 0, 16, 16 ], "texture": "#right", "cullface": "east" }
+      }
+    }
+  ]
+}

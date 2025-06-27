@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"package": "com.disruptioncomplex.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"FishingRodMixin",
+		"FishingBobberEntityMixin",
+		"SlipperyMixin",
+		"PlayerEntityMixin"
+	],
+	"client": [
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
