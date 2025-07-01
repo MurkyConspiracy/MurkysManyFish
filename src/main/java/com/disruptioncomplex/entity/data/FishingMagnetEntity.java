@@ -2,6 +2,7 @@ package com.disruptioncomplex.entity.data;
 
 import com.disruptioncomplex.MurkysManyFish;
 import com.disruptioncomplex.MurkysManyFishClient;
+import com.disruptioncomplex.datagen.FishingLootTableProvider;
 import com.disruptioncomplex.entity.ModEntityHandler;
 import com.disruptioncomplex.item.ModItemHandler;
 import com.disruptioncomplex.util.MagnetHookAccessor;
@@ -16,6 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTables;
@@ -26,6 +28,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.registry.tag.ItemTags;
@@ -42,6 +45,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -59,31 +63,32 @@ import java.util.Objects;
 public class FishingMagnetEntity extends ProjectileEntity {
     // Logging and utilities
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final Random velocityRandom = Random.create();
-
     // Entity tracking data
     private static final TrackedData<Integer> HOOK_ENTITY_ID = DataTracker.registerData(FishingMagnetEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final TrackedData<Boolean> CAUGHT_FISH = DataTracker.registerData(FishingMagnetEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    //private static final TrackedData<Float> MAGNET_DEPTH = DataTracker.registerData(FishingMagnetEntity.class, TrackedDataHandlerRegistry.FLOAT);
     private static final TrackedData<MagnetFishingData> MAGNET_DATA =
             DataTracker.registerData(FishingMagnetEntity.class, ModTrackedDataHandlers.MAGNET_FISHING_DATA_HANDLER);
-
+    private final Random velocityRandom = Random.create();
+    private final int hookCountdown;     // Time until a hook attempt
+    private final int fishTravelCountdown; // Controls fish movement animation
+    // Fishing mechanics modifiers
+    final int luckBonus;   // Increases chance of better loot
+    // Loot Utilities and Data
+    Item trashItem;
+    Item treasureItem;
+    Item lootItem;
     // Fishing state variables
     private boolean caughtFish;
     private int outOfOpenWaterTicks;
     private boolean inOpenWater = true;
     @Nullable
     private Entity hookedEntity;
-    private FishingMagnetEntity.State state = FishingMagnetEntity.State.FLYING;
-
+    MagnetHookUtilities.State state = MagnetHookUtilities.State.FLYING;
     // Timers and counters
     private int removalTimer;      // Controls when entity should be removed
-    private final int hookCountdown;     // Time until a hook attempt
-    private final int fishTravelCountdown; // Controls fish movement animation
-
-    // Fishing mechanics modifiers
-    private final int luckBonus;   // Increases chance of better loot
-
+    // Add these fields to your class
+    double waterSurfaceY = 0;
+    double waterBottomY = 0;
 
     /**
      * Base constructor for the fishing magnet entity.
@@ -98,6 +103,9 @@ public class FishingMagnetEntity extends ProjectileEntity {
         this.luckBonus = Math.max(0, luckBonus);
         this.hookCountdown = 0;
         this.fishTravelCountdown = 0;
+        trashItem = null;
+        treasureItem = null;
+        lootItem = null;
     }
 
     /**
@@ -177,7 +185,6 @@ public class FishingMagnetEntity extends ProjectileEntity {
 
     }
 
-
     public float getDepth() {
         return this.getMagnetData().assetInfo().depth();
     }
@@ -198,6 +205,12 @@ public class FishingMagnetEntity extends ProjectileEntity {
 
     public void setMaxDepth(int maxDepth) {
         MagnetFishingData currentData = this.getMagnetData();
+        if (currentData == null)
+        {
+            currentData = createDefaultMagnetData();
+        }
+        Objects.requireNonNull(currentData, "currentData should not be null after default creation");
+
         MagnetFishingData.MagnetBobberData newBobberData = new MagnetFishingData.MagnetBobberData(
                 currentData.assetInfo().depth(),
                 maxDepth,
@@ -205,7 +218,6 @@ public class FishingMagnetEntity extends ProjectileEntity {
         );
         this.setMagnetData(new MagnetFishingData(newBobberData));
     }
-
 
     @Override
     protected boolean deflectsAgainstWorldBorder() {
@@ -261,7 +273,6 @@ public class FishingMagnetEntity extends ProjectileEntity {
 
     }
 
-
     /**
      * Determines if this entity should be rendered based on distance from the player.
      * Standard Minecraft render distance squared is 4096.0 blocks.
@@ -299,7 +310,7 @@ public class FishingMagnetEntity extends ProjectileEntity {
         PlayerEntity playerEntity = this.getPlayerOwner();
         if (playerEntity == null) {
             this.discard();
-        } else if (this.getWorld().isClient || this.checkIfValid(playerEntity)) {
+        } else if (this.getWorld().isClient || MagnetHookUtilities.checkIfValid(playerEntity, this)) {
             if (this.isOnGround()) {
                 this.removalTimer++;
                 if (this.removalTimer >= 1200) {
@@ -310,7 +321,7 @@ public class FishingMagnetEntity extends ProjectileEntity {
                 this.removalTimer = 0;
             }
 
-            if (this.state == FishingMagnetEntity.State.GROUNDED) {
+            if (this.state == MagnetHookUtilities.State.GROUNDED) {
                 return;
             }
 
@@ -322,35 +333,35 @@ public class FishingMagnetEntity extends ProjectileEntity {
             }
 
             boolean bl = f > 0.0F;
-            if (this.state == FishingMagnetEntity.State.FLYING) {
+            if (this.state == MagnetHookUtilities.State.FLYING) {
                 if (this.hookedEntity != null) {
                     this.setVelocity(Vec3d.ZERO);
-                    this.setState(FishingMagnetEntity.State.HOOKED_IN_ENTITY);
+                    MagnetHookUtilities.setState(MagnetHookUtilities.State.HOOKED_IN_ENTITY, this);
                     return;
                 }
 
                 if (bl) {
                     this.setVelocity(this.getVelocity().multiply(0.3, 0.2, 0.3));
-                    this.setState(State.SINKING);
+                    MagnetHookUtilities.setState(MagnetHookUtilities.State.SINKING, this);
                     return;
                 }
 
                 this.checkForCollision();
             } else {
-                if (this.state == FishingMagnetEntity.State.HOOKED_IN_ENTITY) {
+                if (this.state == MagnetHookUtilities.State.HOOKED_IN_ENTITY) {
                     if (this.hookedEntity != null) {
                         if (!this.hookedEntity.isRemoved() && this.hookedEntity.getWorld().getRegistryKey() == this.getWorld().getRegistryKey()) {
                             this.setPosition(this.hookedEntity.getX(), this.hookedEntity.getBodyY(0.8), this.hookedEntity.getZ());
                         } else {
                             this.updateHookedEntityId(null);
-                            this.setState(FishingMagnetEntity.State.FLYING);
+                            MagnetHookUtilities.setState(MagnetHookUtilities.State.FLYING, this);
                         }
                     }
 
                     return;
                 }
 
-                if (this.state == State.SINKING) {
+                if (this.state == MagnetHookUtilities.State.SINKING) {
                     MurkysManyFishClient.IS_MAGNET_FISHING_ROD_ACTIVE = true;
                     Vec3d vec3d = this.getVelocity();
 
@@ -359,11 +370,11 @@ public class FishingMagnetEntity extends ProjectileEntity {
 
                     // Calculate water boundaries only once when entering a sinking state
                     if (this.waterSurfaceY == 0 || this.waterBottomY == 0) {
-                        this.calculateWaterBoundaries();
+                        MagnetHookUtilities.calculateWaterBoundaries(this);
                     }
 
                     // Calculate depth percentage
-                    float depthPercentage = this.calculateDepthPercentage();
+                    float depthPercentage = MagnetHookUtilities.calculateDepthPercentage(this);
 
                     // Check if we've reached the ground
                     double distanceToGround = this.getY() - this.waterBottomY;
@@ -375,7 +386,7 @@ public class FishingMagnetEntity extends ProjectileEntity {
                     }
 
                     if (distanceToGround <= 0.125 || this.getVelocity().y == 0.0) {
-                        this.setState(State.GROUNDED);
+                        MagnetHookUtilities.setState(MagnetHookUtilities.State.GROUNDED, this);
                         if (!this.getWorld().isClient) {
                             this.setDepth(100f);
                         }
@@ -387,7 +398,7 @@ public class FishingMagnetEntity extends ProjectileEntity {
                     } else {
                         // Only perform expensive water check every 10 ticks or when conditions change
                         if (this.age % 10 == 0 || this.outOfOpenWaterTicks == 0) {
-                            this.inOpenWater = this.inOpenWater && this.outOfOpenWaterTicks < 10 && this.isOpenOrWaterAround(blockPos);
+                            this.inOpenWater = this.inOpenWater && this.outOfOpenWaterTicks < 10 && MagnetHookUtilities.isOpenOrWaterAround(blockPos, this);
                         }
                     }
 
@@ -413,7 +424,7 @@ public class FishingMagnetEntity extends ProjectileEntity {
             this.move(MovementType.SELF, this.getVelocity());
             this.tickBlockCollision();
             this.updateRotation();
-            if (this.state == FishingMagnetEntity.State.FLYING && (this.isOnGround() || this.horizontalCollision)) {
+            if (this.state == MagnetHookUtilities.State.FLYING && (this.isOnGround() || this.horizontalCollision)) {
                 this.setVelocity(Vec3d.ZERO);
             }
 
@@ -422,112 +433,7 @@ public class FishingMagnetEntity extends ProjectileEntity {
         }
     }
 
-    private static String getRange(float maxDepth) {
-        if (maxDepth < 5)
-            return "NA";
-        else if (maxDepth < 10)
-            return "LOW";
-        else if (maxDepth < 15)
-            return "MEDIUM";
-        else if (maxDepth < 20)
-            return "HIGH";
-        else
-            return "EXTREME";
-    }
 
-    private void assignMagnetLoot() {
-        if (this.getWorld().isClient) {
-            return;
-        }
-
-        switch (getRange(this.getMagnetData().assetInfo().maxDepth())) {
-
-            case "NA":
-                break;
-            case "LOW":
-
-
-            default:
-                break;
-
-        }
-
-
-    }
-
-    // Add these fields to your class
-    private double waterSurfaceY = 0;
-    private double waterBottomY = 0;
-
-    // Updated helper methods
-    private void calculateWaterBoundaries() {
-        BlockPos currentPos = this.getBlockPos();
-
-        // Find water surface (highest water block)
-        BlockPos surfacePos = currentPos;
-
-        // First, go up to find the surface
-        while (this.getWorld().getFluidState(surfacePos).isIn(FluidTags.WATER)) {
-            surfacePos = surfacePos.up();
-            // Safety check to prevent infinite loops
-            if (surfacePos.getY() > currentPos.getY() + 64) break;
-        }
-        // The water surface is one block below the first non-water block
-        this.waterSurfaceY = surfacePos.getY() - 0.1; // Slight offset to account for fluid level
-
-        // Find water bottom (lowest water block)
-        BlockPos bottomPos = currentPos;
-        while (this.getWorld().getFluidState(bottomPos).isIn(FluidTags.WATER)) {
-            bottomPos = bottomPos.down();
-            // Safety check to prevent infinite loops
-            if (bottomPos.getY() < currentPos.getY() - 64) break;
-        }
-        // The water bottom is one block above the first non-water block
-        this.waterBottomY = bottomPos.getY() + 1.0;
-
-    }
-
-
-    private float calculateDepthPercentage() {
-        if (this.waterSurfaceY == 0 || this.waterBottomY == 0) {
-            return 0.0f;
-        }
-
-        double totalDepth = this.waterSurfaceY - this.waterBottomY;
-        if (totalDepth <= 0) {
-            return 0.0f;
-        }
-
-        double currentDepth = this.waterSurfaceY - this.getY();
-        float percentage = (float) ((currentDepth / totalDepth) * 100.0);
-
-        return MathHelper.clamp(percentage, 0.0f, 100.0f);
-    }
-
-    // Override state change method to reset water surface calculation
-    private void setState(State newState) {
-        if (this.state != newState) {
-            this.state = newState;
-            // Reset water boundary calculations when entering a sinking state
-            if (newState == State.SINKING) {
-                this.waterSurfaceY = 0;
-                this.waterBottomY = 0;
-            }
-        }
-    }
-
-    private boolean checkIfValid(PlayerEntity player) {
-        ItemStack itemStack = player.getMainHandStack();
-        ItemStack itemStack2 = player.getOffHandStack();
-        boolean bl = itemStack.isOf(ModItemHandler.MAGNET_FISHING_ROD);
-        boolean bl2 = itemStack2.isOf(ModItemHandler.MAGNET_FISHING_ROD);
-        if (!player.isRemoved() && player.isAlive() && (bl || bl2) && !(this.squaredDistanceTo(player) > 1024.0)) {
-            return true;
-        } else {
-            this.discard();
-            return false;
-        }
-    }
 
     private void checkForCollision() {
         HitResult hitResult = ProjectileUtil.getCollision(this, this::canHit);
@@ -563,12 +469,12 @@ public class FishingMagnetEntity extends ProjectileEntity {
         ServerWorld serverWorld = (ServerWorld) this.getWorld();
         if (!this.getWorld().isClient &&
                 serverWorld.getTickOrder() % 30 == 0 &&
-                this.state == State.SINKING
+                this.state == MagnetHookUtilities.State.SINKING
         ) {
             this.playSound(SoundEvents.ENTITY_FISHING_BOBBER_SPLASH, 0.25F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.4F);
 
             serverWorld.spawnParticles(
-                    ParticleTypes.BUBBLE, this.getX(), this.waterSurfaceY, this.getZ(), (int) (1.0F + this.getWidth() * 20.0F), this.getWidth(), 0.0, this.getWidth(), 0.2F
+                    MagnetHookUtilities.RED_DUST, this.getX(), this.waterSurfaceY, this.getZ(), (int) (1.0F + this.getWidth() * 20.0F), this.getWidth(), 0.0, this.getWidth(), 0.2F
             );
             serverWorld.spawnParticles(
                     ParticleTypes.FISHING, this.getX(), this.waterSurfaceY, this.getZ(), (int) (1.0F + this.getWidth() * 20.0F), this.getWidth(), 0.0, this.getWidth(), 0.2F
@@ -581,51 +487,6 @@ public class FishingMagnetEntity extends ProjectileEntity {
 
     }
 
-    private boolean isOpenOrWaterAround(BlockPos pos) {
-        FishingMagnetEntity.PositionType positionType = FishingMagnetEntity.PositionType.INVALID;
-
-        for (int i = -1; i <= 2; i++) {
-            FishingMagnetEntity.PositionType positionType2 = this.getPositionType(pos.add(-2, i, -2), pos.add(2, i, 2));
-            switch (positionType2) {
-                case ABOVE_WATER:
-                    if (positionType == FishingMagnetEntity.PositionType.INVALID) {
-                        return false;
-                    }
-                    break;
-                case INSIDE_WATER:
-                    if (positionType == FishingMagnetEntity.PositionType.ABOVE_WATER) {
-                        return false;
-                    }
-                    break;
-                case INVALID:
-                    return false;
-            }
-
-            positionType = positionType2;
-        }
-
-        return true;
-    }
-
-    private FishingMagnetEntity.PositionType getPositionType(BlockPos start, BlockPos end) {
-        return BlockPos.stream(start, end)
-                .map(this::getPositionType)
-                .reduce((positionType, positionType2) -> positionType == positionType2 ? positionType : PositionType.INVALID)
-                .orElse(PositionType.INVALID);
-    }
-
-    private FishingMagnetEntity.PositionType getPositionType(BlockPos pos) {
-        BlockState blockState = this.getWorld().getBlockState(pos);
-        if (!blockState.isAir() && !blockState.isOf(Blocks.LILY_PAD)) {
-            FluidState fluidState = blockState.getFluidState();
-            return fluidState.isIn(FluidTags.WATER) && fluidState.isStill() && blockState.getCollisionShape(this.getWorld(), pos).isEmpty()
-                    ? FishingMagnetEntity.PositionType.INSIDE_WATER
-                    : FishingMagnetEntity.PositionType.INVALID;
-        } else {
-            return FishingMagnetEntity.PositionType.ABOVE_WATER;
-        }
-    }
-
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
     }
@@ -636,7 +497,7 @@ public class FishingMagnetEntity extends ProjectileEntity {
 
     public int use(ItemStack usedItem) {
         PlayerEntity playerEntity = this.getPlayerOwner();
-        if (!this.getWorld().isClient && playerEntity != null && this.checkIfValid(playerEntity)) {
+        if (!this.getWorld().isClient && playerEntity != null && MagnetHookUtilities.checkIfValid(playerEntity, this)) {
             int i = 0;
             if (this.hookedEntity != null) {
                 this.pullHookedEntity(this.hookedEntity);
@@ -733,7 +594,6 @@ public class FishingMagnetEntity extends ProjectileEntity {
         this.setPlayerFishHook(this);
     }
 
-
     // Update your existing setPlayerFishHook method or create a new one
     private void setPlayerFishHook(@Nullable FishingMagnetEntity fishingMagnetEntity) {
         PlayerEntity playerEntity = this.getPlayerOwner();
@@ -744,12 +604,10 @@ public class FishingMagnetEntity extends ProjectileEntity {
         }
     }
 
-
     @Nullable
     public PlayerEntity getPlayerOwner() {
         return this.getOwner() instanceof PlayerEntity playerEntity ? playerEntity : null;
     }
-
 
     @Override
     public boolean canUsePortals(boolean allowVehicles) {
@@ -772,16 +630,362 @@ public class FishingMagnetEntity extends ProjectileEntity {
         }
     }
 
-    enum PositionType {
-        ABOVE_WATER,
-        INSIDE_WATER,
-        INVALID
+}
+
+
+/**
+ * Utility class providing helper methods for magnet fishing mechanics.
+ * Handles position checking, water detection, and loot assignment.
+ */
+class MagnetHookUtilities {
+
+    static final DustParticleEffect RED_DUST = new DustParticleEffect(
+            0xFF4500, // RGB color (red)
+            1.0f // Size
+    );
+
+    /**
+     * Determines the position type for a range of blocks from start to end position.
+     * If all blocks have the same position type, returns that type, otherwise INVALID.
+     *
+     * @param start        Starting block position
+     * @param end          Ending block position
+     * @param magnetEntity The fishing magnet entity
+     * @return The consistent PositionType if found, or INVALID
+     */
+    private static MagnetHookUtilities.PositionType getPositionType(BlockPos start, BlockPos end, FishingMagnetEntity magnetEntity) {
+        return BlockPos.stream(start, end)
+                .map(pos -> getPositionType(pos, magnetEntity))
+                .reduce((positionType, positionType2) -> positionType == positionType2 ? positionType : PositionType.INVALID)
+                .orElse(MagnetHookUtilities.PositionType.INVALID);
     }
 
-    enum State {
-        FLYING,
-        HOOKED_IN_ENTITY,
-        SINKING,
-        GROUNDED
+    /**
+     * Determines the position type for a single block position.
+     * Checks for air, lily pads, and water states.
+     *
+     * @param pos          The block position to check
+     * @param magnetEntity The fishing magnet entity
+     * @return The PositionType for the given position
+     */
+    private static MagnetHookUtilities.PositionType getPositionType(BlockPos pos, FishingMagnetEntity magnetEntity) {
+        BlockState blockState = magnetEntity.getWorld().getBlockState(pos);
+        if (!blockState.isAir() && !blockState.isOf(Blocks.LILY_PAD)) {
+            FluidState fluidState = blockState.getFluidState();
+            return fluidState.isIn(FluidTags.WATER) && fluidState.isStill() && blockState.getCollisionShape(magnetEntity.getWorld(), pos).isEmpty()
+                    ? MagnetHookUtilities.PositionType.INSIDE_WATER
+                    : MagnetHookUtilities.PositionType.INVALID;
+        } else {
+            return MagnetHookUtilities.PositionType.ABOVE_WATER;
+        }
     }
+
+    /**
+     * Checks if the area around a given position is open water suitable for fishing.
+     * Examines a 5x4x5 area centered on the given position to determine if it contains
+     * valid water blocks in the correct configuration for fishing.
+     *
+     * @param pos          The central position to check around
+     * @param magnetEntity The fishing magnet entity doing the check
+     * @return true if the area is valid open water, false otherwise
+     */
+    static boolean isOpenOrWaterAround(BlockPos pos, FishingMagnetEntity magnetEntity) {
+        MagnetHookUtilities.PositionType positionType = MagnetHookUtilities.PositionType.INVALID;
+
+        for (int i = -1; i <= 2; i++) {
+            MagnetHookUtilities.PositionType positionType2 = getPositionType(pos.add(-2, i, -2), pos.add(2, i, 2), magnetEntity);
+            switch (positionType2) {
+                case ABOVE_WATER:
+                    if (positionType == MagnetHookUtilities.PositionType.INVALID) {
+                        return false;
+                    }
+                    break;
+                case INSIDE_WATER:
+                    if (positionType == MagnetHookUtilities.PositionType.ABOVE_WATER) {
+                        return false;
+                    }
+                    break;
+                case INVALID:
+                    return false;
+            }
+
+            positionType = positionType2;
+        }
+
+        return true;
+    }
+
+    /**
+     * Calculates and sets the water surface and bottom Y coordinates for the magnet entity.
+     * This method scans vertically up and down from the current position to find:
+     * - The highest water block (surface) by scanning upward until non-water is found
+     * - The lowest water block (bottom) by scanning downward until non-water is found
+     * <p>
+     * The method includes safety checks to prevent infinite loops by limiting the scan range
+     * to 64 blocks in either direction from the current position.
+     *
+     * @param magnetEntity The fishing magnet entity to calculate boundaries for
+     */
+    static void calculateWaterBoundaries(FishingMagnetEntity magnetEntity) {
+        BlockPos currentPos = magnetEntity.getBlockPos();
+
+        // Find water surface (highest water block)
+        BlockPos surfacePos = currentPos;
+
+        // First, go up to find the surface
+        while (magnetEntity.getWorld().getFluidState(surfacePos).isIn(FluidTags.WATER)) {
+            surfacePos = surfacePos.up();
+            // Safety check to prevent infinite loops
+            if (surfacePos.getY() > currentPos.getY() + 64) break;
+        }
+        // The water surface is one block below the first non-water block
+        magnetEntity.waterSurfaceY = surfacePos.getY() - 0.1; // Slight offset to account for fluid level
+
+        // Find water bottom (lowest water block)
+        BlockPos bottomPos = currentPos;
+        while (magnetEntity.getWorld().getFluidState(bottomPos).isIn(FluidTags.WATER)) {
+            bottomPos = bottomPos.down();
+            // Safety check to prevent infinite loops
+            if (bottomPos.getY() < currentPos.getY() - 64) break;
+        }
+        // The water bottom is one block above the first non-water block
+        magnetEntity.waterBottomY = bottomPos.getY() + 1.0;
+        magnetEntity.setMaxDepth((int) (magnetEntity.waterSurfaceY - magnetEntity.waterBottomY));
+    }
+
+    /**
+     * Calculates the current depth percentage of the magnet entity relative to the water column.
+     * The percentage is calculated as:
+     * - 0% at water surface
+     * - 100% at water bottom
+     * - Proportional values in between
+     * <p>
+     * The method includes validation to handle edge cases:
+     * - Returns 0% if water boundaries haven't been calculated
+     * - Returns 0% if total water depth is 0 or negative
+     * - Clamps final percentage between 0% and 100%
+     *
+     * @param magnetEntity The fishing magnet entity to calculate depth percentage for
+     * @return The current depth percentage between 0.0 and 100.0
+     */
+    static float calculateDepthPercentage(FishingMagnetEntity magnetEntity) {
+        if (magnetEntity.waterSurfaceY == 0 || magnetEntity.waterBottomY == 0) {
+            return 0.0f;
+        }
+
+        double totalDepth = magnetEntity.waterSurfaceY - magnetEntity.waterBottomY;
+        if (totalDepth <= 0) {
+            return 0.0f;
+        }
+
+        double currentDepth = magnetEntity.waterSurfaceY - magnetEntity.getY();
+        float percentage = (float) ((currentDepth / totalDepth) * 100.0);
+
+        return MathHelper.clamp(percentage, 0.0f, 100.0f);
+    }
+
+    /**
+     * Validates if the magnet fishing operation can continue based on player state and equipment.
+     * Checks multiple conditions:
+     * - Player exists and is alive
+     * - Player has magnet fishing rod in either hand
+     * - Player is within valid range (32 blocks) of the magnet
+     *
+     * @param player       The player to validate
+     * @param magnetEntity The fishing magnet entity being used
+     * @return true if all conditions are met, false otherwise
+     */
+    static boolean checkIfValid(PlayerEntity player, FishingMagnetEntity magnetEntity) {
+        ItemStack itemStack = player.getMainHandStack();
+        ItemStack itemStack2 = player.getOffHandStack();
+        boolean bl = itemStack.isOf(ModItemHandler.MAGNET_FISHING_ROD);
+        boolean bl2 = itemStack2.isOf(ModItemHandler.MAGNET_FISHING_ROD);
+        if (!player.isRemoved() && player.isAlive() && (bl || bl2) && !(magnetEntity.squaredDistanceTo(player) > 1024.0)) {
+            return true;
+        } else {
+            magnetEntity.discard();
+            return false;
+        }
+    }
+
+    /**
+     * Determines the depth range category based on the maximum depth value.
+     * Used to classify magnet fishing depths into categories for loot tables
+     * and gameplay mechanics.
+     *
+     * @param maxDepth The maximum depth value to categorize
+     * @return String representing the depth range category ("NA", "LOW", "MEDIUM", "HIGH", "EXTREME")
+     */
+    private static String getRange(float maxDepth) {
+        if (maxDepth < 5)
+            return "NA";
+        else if (maxDepth < 10)
+            return "LOW";
+        else if (maxDepth < 15)
+            return "MEDIUM";
+        else if (maxDepth < 20)
+            return "HIGH";
+        else
+            return "EXTREME";
+    }
+
+    /**
+     * Assigns appropriate loot to the magnet entity based on its depth range.
+     * Only executes on the server side and uses the magnet's current depth range
+     * to determine what loot table to use.
+     *
+     * @param magnetEntity The fishing magnet entity to assign loot to
+     */
+    static void assignMagnetLoot(FishingMagnetEntity magnetEntity) {
+        if (magnetEntity.getWorld().isClient) {
+            return;
+        }
+
+        LootWorldContext lootWorldContext =
+                (new LootWorldContext.Builder((ServerWorld)magnetEntity.getWorld()))
+                        .add(LootContextParameters.ORIGIN, magnetEntity.getPos())
+                        .add(LootContextParameters.TOOL, Objects.requireNonNull(magnetEntity.getPlayerOwner()).getMainHandStack())
+                        .add(LootContextParameters.THIS_ENTITY, magnetEntity)
+                        .luck((float)magnetEntity.luckBonus + Objects.requireNonNull(magnetEntity.getPlayerOwner()).getLuck())
+                        .build(LootContextTypes.FISHING);
+        LootTable trashLootTable;
+        List<ItemStack> trashItemStack;
+
+        LootTable magnetLootTable;
+        List<ItemStack> magnetItemStack;
+        
+        LootTable magnetTreasureTable;
+        List<ItemStack> magnetTreasureItemStack;
+        
+        switch (getRange(magnetEntity.getMaxDepth())) {
+
+            case "NA":
+                MurkysManyFish.LOGGER.error("Invalid depth range for magnet fishing: NA");
+                break;
+
+            case "LOW":
+                MurkysManyFish.LOGGER.debug("Low depth range for magnet fishing");
+                
+                trashLootTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_GARBAGE);
+                trashItemStack = trashLootTable.generateLoot(lootWorldContext);
+                magnetEntity.trashItem = trashItemStack.getFirst().getItem();
+
+                magnetLootTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_ORE_LOW);
+                magnetItemStack = magnetLootTable.generateLoot(lootWorldContext);
+                magnetEntity.lootItem = magnetItemStack.getFirst().getItem();
+                break;
+
+            case "MEDIUM":
+                MurkysManyFish.LOGGER.debug("Medium depth range for magnet fishing");
+
+                trashLootTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_GARBAGE);
+                trashItemStack = trashLootTable.generateLoot(lootWorldContext);
+                magnetEntity.trashItem = trashItemStack.getFirst().getItem();
+
+                magnetLootTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_ORE_MEDIUM);
+                magnetItemStack = magnetLootTable.generateLoot(lootWorldContext);
+                magnetEntity.lootItem = magnetItemStack.getFirst().getItem();
+                break;
+
+            case "HIGH":
+                MurkysManyFish.LOGGER.debug("High depth range for magnet fishing");
+
+                trashLootTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_GARBAGE);
+                trashItemStack = trashLootTable.generateLoot(lootWorldContext);
+                magnetEntity.trashItem = trashItemStack.getFirst().getItem();
+
+                magnetLootTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_ORE_HIGH);
+                magnetItemStack = magnetLootTable.generateLoot(lootWorldContext);
+                magnetEntity.lootItem = magnetItemStack.getFirst().getItem();
+
+                magnetTreasureTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_TREASURE);
+                magnetTreasureItemStack = magnetTreasureTable.generateLoot(lootWorldContext);
+                magnetEntity.treasureItem = magnetTreasureItemStack.getFirst().getItem();
+                break;
+
+            case "EXTREME":
+                MurkysManyFish.LOGGER.debug("Extreme depth range for magnet fishing");
+
+                trashLootTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_GARBAGE);
+                trashItemStack = trashLootTable.generateLoot(lootWorldContext);
+                magnetEntity.trashItem = trashItemStack.getFirst().getItem();
+
+                magnetLootTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_ORE_HIGH);
+                magnetItemStack = magnetLootTable.generateLoot(lootWorldContext);
+                magnetEntity.lootItem = magnetItemStack.getFirst().getItem();
+
+                magnetTreasureTable = Objects.requireNonNull(magnetEntity.getWorld().getServer())
+                        .getReloadableRegistries()
+                        .getLootTable(FishingLootTableProvider.MAGNET_FISHING_TREASURE);
+                magnetTreasureItemStack = magnetTreasureTable.generateLoot(lootWorldContext);
+                magnetEntity.treasureItem = magnetTreasureItemStack.getFirst().getItem();
+                break;
+
+            default:
+                break;
+
+        }
+
+
+    }
+
+    /**
+     * Represents different possible positions of the magnet relative to water.
+     * Used for determining valid fishing locations and behavior.
+     */
+    enum PositionType {
+        ABOVE_WATER,    // Position is above water surface
+        INSIDE_WATER,   // Position is inside water block
+        INVALID         // Position is invalid for fishing
+    }
+
+    /**
+     * Represents the different states a fishing magnet can be in.
+     * Controls behavior and physics of the magnet entity.
+     */
+    enum State {
+        FLYING,          // Initial throw state
+        HOOKED_IN_ENTITY, // Attached to an entity
+        SINKING,         // Moving through water
+        GROUNDED         // Resting on bottom
+    }
+
+    /**
+     * Updates the state of a fishing magnet entity and handles associated state transitions.
+     * When transitioning to a SINKING state, resets water boundary calculations to ensure
+     * proper depth tracking begins anew.
+     *
+     * @param newState     The new state to transition the magnet entity to
+     * @param magnetEntity The fishing magnet entity whose state is being updated
+     */
+    static void setState(MagnetHookUtilities.State newState, FishingMagnetEntity magnetEntity) {
+        if (magnetEntity.state != newState) {
+            magnetEntity.state = newState;
+            // Reset water boundary calculations when entering a sinking state
+            if (newState == MagnetHookUtilities.State.SINKING) {
+                magnetEntity.waterSurfaceY = 0;
+                magnetEntity.waterBottomY = 0;
+            }
+        }
+    }
+
+
 }

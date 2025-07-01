@@ -64,8 +64,10 @@ base {
 }
 
 repositories {
-    maven { url 'https://maven.wispforest.io/releases/' }
     mavenLocal()
+    maven { url 'https://maven.wispforest.io/releases/' }
+    mavenCentral()
+
 }
 
 // Configure all configurations to not cache dynamic versions or changing modules
@@ -98,7 +100,7 @@ dependencies {
     annotationProcessor modImplementation("io.wispforest:owo-lib:${project.owo_version}")
 
     // Add the missing murkysmanyapis dependency
-    modImplementation "com.disruptioncomplex:murkysmanyapis:${project.murkysmanyapis_version}"
+    modImplementation "com.disruptioncomplex.murkysmanyapis:murkysmanyapis:${project.murkysmanyapis_version}"
 }
 
 processResources {
